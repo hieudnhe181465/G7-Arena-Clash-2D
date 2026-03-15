@@ -10,6 +10,12 @@ public class Player : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform groundCheck;
 
+    // Hieu
+    [Header("Attack Settings")]
+    [SerializeField] private Transform attackPoint;
+    [SerializeField] private float attackRange = 2f;
+    [SerializeField] private LayerMask enemyLayer;
+
     private bool isGrounded = true;
     private int jumpCount = 0;
 
@@ -82,11 +88,53 @@ public class Player : MonoBehaviour
         animator.SetBool("IsRunning", playerMoveInput != 0);
     }
 
+    //private void HandleCombat()
+    //{
+    //    if (Input.GetKeyDown(KeyCode.Z))
+    //    {
+    //        animator.SetTrigger("Attack");
+    //    }
+    //}
+
     private void HandleCombat()
     {
         if (Input.GetKeyDown(KeyCode.Z))
         {
             animator.SetTrigger("Attack");
+
+            Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
+                attackPoint.position,
+                attackRange,
+                enemyLayer
+            );
+
+            foreach (Collider2D enemy in hitEnemies)
+            {
+                Vector2 direction = enemy.transform.position - transform.position;
+                StunController stun = enemy.GetComponent<StunController>();
+                animator.SetTrigger("Stun");
+                if (stun != null)
+                {
+                    stun.Stun();
+                }
+                if (!spriteRenderer.flipX && direction.x > 0)
+                {
+                    Debug.Log("Đấm trúng enemy phía trước: " + enemy.name);
+                }
+
+                if (spriteRenderer.flipX && direction.x < 0)
+                {
+                    Debug.Log("Đấm trúng enemy phía trước: " + enemy.name);
+                }
+            }
         }
     }
+
+    //private void OnDrawGizmosSelected()
+    //{
+    //    if (attackPoint == null) return;
+
+    //    Gizmos.color = Color.red;
+    //    Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+    //}
 }
