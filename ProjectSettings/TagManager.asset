@@ -13,8 +13,13 @@ TagManager:
   - Water
   - UI
   - Ground
+<<<<<<< HEAD
   - Enemy
   - Player
+=======
+  - PlayerLayer
+  - 
+>>>>>>> pr/4
   - 
   - 
   - 
@@ -59,4 +64,7 @@ TagManager:
     locked: 0
   - name: Enemy
     uniqueID: 2102177611
+    locked: 0
+  - name: HpBar
+    uniqueID: 253177151
     locked: 0

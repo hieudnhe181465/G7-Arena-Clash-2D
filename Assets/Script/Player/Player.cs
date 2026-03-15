@@ -10,7 +10,6 @@ public class Player : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform groundCheck;
 
-    // Hieu
     [Header("Attack Settings")]
     [SerializeField] private Transform attackPoint;
     [SerializeField] private float attackRange = 2f;
@@ -23,44 +22,30 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb;
     private Animator animator;
 
+    private int lPressCount = 0;
+    private float lastLClickTime = 0f;
+    public float comboWindow = 0.6f;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
     }
-    void Start() { }
 
-    private void Update()
+    void Update()
     {
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
 
-        if (isGrounded && rb.velocity.y <= 0) jumpCount = 0;
+        if (isGrounded && rb.velocity.y <= 0)
+        {
+            jumpCount = 0;
+        }
 
         HandleMovement();
         HandleJump();
         HandleCombat();
-    }
-
-    private void HandleJump()
-    {
-        animator.SetBool("IsGrounded", isGrounded);
-
-        if (Input.GetButtonDown("Jump"))
-        {
-            if (isGrounded) // Nhảy lần 1
-            {
-                jumpCount = 1;
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-                animator.SetTrigger("Jump");
-            }
-            else if (jumpCount == 1) // Nhảy lần 2 (Double Jump)
-            {
-                jumpCount = 2;
-                rb.velocity = new Vector2(rb.velocity.x, doubleJumpForce); // Nhảy cao hơn
-                animator.SetTrigger("Jump");
-            }
-        }
+        HandleBlock();
     }
 
     private void HandleMovement()
@@ -76,65 +61,107 @@ public class Player : MonoBehaviour
         {
             spriteRenderer.flipX = false;
         }
-        if (playerMoveInput != 0)
-        {
-            animator.SetBool("IsRunning", true);
-        }
-        else
-        {
-            animator.SetBool("IsRunning", false);
-        }
 
         animator.SetBool("IsRunning", playerMoveInput != 0);
     }
 
-    //private void HandleCombat()
-    //{
-    //    if (Input.GetKeyDown(KeyCode.Z))
-    //    {
-    //        animator.SetTrigger("Attack");
-    //    }
-    //}
-
-    private void HandleCombat()
+    private void HandleJump()
     {
-        if (Input.GetKeyDown(KeyCode.Z))
+        animator.SetBool("IsGrounded", isGrounded);
+
+        if (Input.GetButtonDown("Jump"))
         {
-            animator.SetTrigger("Attack");
-
-            Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
-                attackPoint.position,
-                attackRange,
-                enemyLayer
-            );
-
-            foreach (Collider2D enemy in hitEnemies)
+            if (isGrounded)
             {
-                Vector2 direction = enemy.transform.position - transform.position;
-                StunController stun = enemy.GetComponent<StunController>();
-                animator.SetTrigger("Stun");
-                if (stun != null)
-                {
-                    stun.Stun();
-                }
-                if (!spriteRenderer.flipX && direction.x > 0)
-                {
-                    Debug.Log("Đấm trúng enemy phía trước: " + enemy.name);
-                }
-
-                if (spriteRenderer.flipX && direction.x < 0)
-                {
-                    Debug.Log("Đấm trúng enemy phía trước: " + enemy.name);
-                }
+                jumpCount = 1;
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+                animator.SetTrigger("Jump");
+            }
+            else if (jumpCount == 1)
+            {
+                jumpCount = 2;
+                rb.velocity = new Vector2(rb.velocity.x, doubleJumpForce);
+                animator.SetTrigger("Jump");
             }
         }
     }
 
-    //private void OnDrawGizmosSelected()
-    //{
-    //    if (attackPoint == null) return;
+    private void HandleCombat()
+    {
+        if (Time.time - lastLClickTime > comboWindow)
+        {
+            lPressCount = 0;
+        }
 
-    //    Gizmos.color = Color.red;
-    //    Gizmos.DrawWireSphere(attackPoint.position, attackRange);
-    //}
+        if (Input.GetKeyDown(KeyCode.J))
+        {
+            animator.SetTrigger("Attack");
+            DetectEnemyHit();
+            lPressCount = 0;
+        }
+
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            animator.SetTrigger("Attack2");
+            DetectEnemyHit();
+            lPressCount = 0;
+        }
+
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            lPressCount++;
+            lastLClickTime = Time.time;
+
+            if (lPressCount == 3)
+            {
+                animator.SetTrigger("Combo");
+                DetectEnemyHit();
+                lPressCount = 0;
+            }
+        }
+    }
+
+    private void DetectEnemyHit()
+    {
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
+            attackPoint.position,
+            attackRange,
+            enemyLayer
+        );
+
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            Vector2 direction = enemy.transform.position - transform.position;
+
+            StunController stun = enemy.GetComponent<StunController>();
+            if (stun != null)
+            {
+                stun.Stun();
+            }
+
+            if (!spriteRenderer.flipX && direction.x > 0)
+            {
+                Debug.Log("Hit enemy in front: " + enemy.name);
+            }
+
+            if (spriteRenderer.flipX && direction.x < 0)
+            {
+                Debug.Log("Hit enemy in front: " + enemy.name);
+            }
+        }
+    }
+
+    private void HandleBlock()
+    {
+        bool blocking = Input.GetKey(KeyCode.I);
+        animator.SetBool("Block", blocking);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (attackPoint == null) return;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+    }
 }

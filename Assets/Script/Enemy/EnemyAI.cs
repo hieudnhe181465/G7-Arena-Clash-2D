@@ -11,6 +11,16 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private float attackCooldown = 0.8f; // Khoảng nghỉ giữa các đòn đánh
     [SerializeField] private float stopDurationAfterAttack = 0.8f; // dừng lại sau khi đánh
 
+    [Header("Hitbox & Damage Setup")]
+    [SerializeField] private Transform attackPoint;
+    [SerializeField] private float attackRadius = 0.8f;
+    [SerializeField] private LayerMask targetLayer;
+
+    [SerializeField] private float[] attacKDamages = { 5f, 10f, 15f };
+    [SerializeField] private float[] energyGains = { 10f, 15f, 25f };
+
+    private HpAndMpEnemy myEnergy;
+
     private Transform target;
     private Rigidbody2D rb;
     private Animator animator;
@@ -28,6 +38,8 @@ public class EnemyAI : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+
+        myEnergy = GetComponent<HpAndMpEnemy>();
     }
     void Update()
     {
@@ -72,16 +84,24 @@ public class EnemyAI : MonoBehaviour
         animator.SetBool("IsRunning", false);
         //animator.SetTrigger("Attack");
 
-        int randomChoice = Random.Range(1, 5);
-
-        if (randomChoice == 1) yield return StartCoroutine(SingleAttack("Attack"));
-        else if (randomChoice == 2) yield return StartCoroutine(SingleAttack("Attack2"));
-        else if (randomChoice == 3) yield return StartCoroutine(SingleAttack("Attack3"));
-        else if (randomChoice == 4)
+        if (myEnergy != null && myEnergy.currentEnergy >= myEnergy.maxEnergy)
         {
-            yield return StartCoroutine(SingleAttack("Attack"));
-            yield return StartCoroutine(SingleAttack("Attack2"));
-            yield return StartCoroutine(SingleAttack("Attack3"));
+            int comboChoice = Random.Range(3, 4);
+
+            if (comboChoice == 3)
+            {
+                yield return StartCoroutine(SingleAttack("Attack"));
+                yield return StartCoroutine(SingleAttack("Attack2"));
+                yield return StartCoroutine(SingleAttack("Attack3"));
+            }
+            myEnergy.ResetEnergy();
+        }
+        else
+        {
+            int singleChoice = Random.Range(1, 3);
+            if (singleChoice == 1) yield return StartCoroutine(SingleAttack("Attack"));
+            else if (singleChoice == 2) yield return StartCoroutine(SingleAttack("Attack2"));
+            //else if (singleChoice == 3) yield return StartCoroutine(SingleAttack("Attack3"));
         }
 
         lastAttackTime = Time.time;
@@ -97,7 +117,7 @@ public class EnemyAI : MonoBehaviour
         animator.SetTrigger(attackName);
 
         yield return null;
-        
+
         float animLength = animator.GetCurrentAnimatorStateInfo(0).length;
 
         float waitTime = Mathf.Max(0f, animLength - 0.05f);
@@ -107,5 +127,32 @@ public class EnemyAI : MonoBehaviour
     {
         rb.velocity = new Vector2(rb.velocity.x, 8f);
         animator.SetTrigger("Jump");
+    }
+    public void DealDamage(int attackIndex)
+    {
+        if (attackPoint == null) return;
+
+        Collider2D[] hitTargets = Physics2D.OverlapCircleAll(attackPoint.position, attackRadius, targetLayer);
+
+        foreach (Collider2D hitTarget in hitTargets)
+        {
+            HpAndMpEnemy targetEnergy = hitTarget.GetComponent<HpAndMpEnemy>();
+
+            if (targetEnergy != null)
+            {
+                targetEnergy.TakeDamage(attacKDamages[attackIndex]);
+                targetEnergy.GainEnergy(energyGains[attackIndex]);
+                if (myEnergy != null)
+                {
+                    myEnergy.GainEnergy(energyGains[attackIndex]);
+                }
+            }
+        }
+    }
+    void OnDrawGizmosSelected()
+    {
+        if (attackPoint == null) return;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
     }
 }
