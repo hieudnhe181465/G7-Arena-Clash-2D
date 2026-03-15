@@ -133,20 +133,27 @@ public class Player : MonoBehaviour
         {
             Vector2 direction = enemy.transform.position - transform.position;
 
+            HpAndMpEnemy enemyHP = enemy.GetComponent<HpAndMpEnemy>();
+
+            if (enemyHP != null)
+            {
+                if (!spriteRenderer.flipX && direction.x > 0)
+                {
+                    enemyHP.TakeDamage(10f); // trừ 10 máu
+                    Debug.Log("Hit enemy: " + enemy.name);
+                }
+
+                if (spriteRenderer.flipX && direction.x < 0)
+                {
+                    enemyHP.TakeDamage(10f);
+                    Debug.Log("Hit enemy: " + enemy.name);
+                }
+            }
+
             StunController stun = enemy.GetComponent<StunController>();
             if (stun != null)
             {
                 stun.Stun();
-            }
-
-            if (!spriteRenderer.flipX && direction.x > 0)
-            {
-                Debug.Log("Hit enemy in front: " + enemy.name);
-            }
-
-            if (spriteRenderer.flipX && direction.x < 0)
-            {
-                Debug.Log("Hit enemy in front: " + enemy.name);
             }
         }
     }

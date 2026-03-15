@@ -132,16 +132,20 @@ public class EnemyAI : MonoBehaviour
     {
         if (attackPoint == null) return;
 
-        Collider2D[] hitTargets = Physics2D.OverlapCircleAll(attackPoint.position, attackRadius, targetLayer);
+        Collider2D[] hitTargets = Physics2D.OverlapCircleAll(
+            attackPoint.position,
+            attackRadius,
+            targetLayer
+        );
 
         foreach (Collider2D hitTarget in hitTargets)
         {
-            HpAndMpEnemy targetEnergy = hitTarget.GetComponent<HpAndMpEnemy>();
+            HpAndMPPlayer playerHP = hitTarget.GetComponent<HpAndMPPlayer>();
 
-            if (targetEnergy != null)
+            if (playerHP != null)
             {
-                targetEnergy.TakeDamage(attacKDamages[attackIndex]);
-                targetEnergy.GainEnergy(energyGains[attackIndex]);
+                playerHP.TakeDamage(attacKDamages[attackIndex]);
+
                 if (myEnergy != null)
                 {
                     myEnergy.GainEnergy(energyGains[attackIndex]);
