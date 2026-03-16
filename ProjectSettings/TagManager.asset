@@ -65,6 +65,11 @@ TagManager:
   - name: Enemy
     uniqueID: 2102177611
     locked: 0
+<<<<<<< Updated upstream
   - name: HpBar
     uniqueID: 253177151
+=======
+  - name: UI
+    uniqueID: 2239780597
+>>>>>>> Stashed changes
     locked: 0

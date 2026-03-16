@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Assets.Script.Health;
 
 public class Player : MonoBehaviour
 {
@@ -10,10 +11,14 @@ public class Player : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform groundCheck;
 
+<<<<<<< Updated upstream
     [Header("Attack Settings")]
     [SerializeField] private Transform attackPoint;
     [SerializeField] private float attackRange = 2f;
     [SerializeField] private LayerMask enemyLayer;
+=======
+    
+>>>>>>> Stashed changes
 
     private bool isGrounded = true;
     private int jumpCount = 0;
@@ -32,6 +37,11 @@ public class Player : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
     }
+<<<<<<< Updated upstream
+=======
+    void Start() {
+    }
+>>>>>>> Stashed changes
 
     void Update()
     {
