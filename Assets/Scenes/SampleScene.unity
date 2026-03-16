@@ -1258,7 +1258,6 @@ GameObject:
   - component: {fileID: 889370747}
   - component: {fileID: 889370751}
   - component: {fileID: 889370752}
-  - component: {fileID: 889370753}
   - component: {fileID: 889370754}
   m_Layer: 7
   m_Name: Player
@@ -1454,26 +1453,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &889370753
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 889370746}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ea9784f503045d4392c4153ab38536c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isPlayer2: 0
-  moveSpeed: 6
-  jumpForce: 5
-  doubleJumpForce: 7
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  groundCheck: {fileID: 1390568637}
 --- !u!114 &889370754
 MonoBehaviour:
   m_ObjectHideFlags: 0
